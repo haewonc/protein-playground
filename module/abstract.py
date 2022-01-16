@@ -7,10 +7,6 @@ class Agent(metaclass=ABCMeta):
 
 class Mutator(metaclass=ABCMeta):
     @abstractmethod
-    def initialize(self):
-        pass
-    def fit(self):
-        pass
     def mutate(self):
         pass
 
