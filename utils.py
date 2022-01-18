@@ -119,7 +119,7 @@ def get_angles(a, b, c):
 
     return np.arccos(x)
 
-def seq_to_input(self, seq):
+def seq_to_in(self, seq):
     ncol = tf.shape(seq)[1]
     msa1hot  = tf.one_hot(seq, 21)
     weight = reweight(msa1hot, 0.8)

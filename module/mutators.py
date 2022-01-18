@@ -5,11 +5,11 @@ from abstract import Mutator
 class RandomMutator():
     def __init__(self, length, aa=None):
         self.length = length 
-        self.population = np.arange(21)
+        self.population = np.arange(20)
         if aa is None:
-            policy = np.ones(21)
+            policy = np.ones(20)
         else:
-            policy = np.zeros(21)
+            policy = np.zeros(20)
             for i in aa:
                 self.policy[i] = 1.0
         self.policy = policy / np.sum(policy)

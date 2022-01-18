@@ -1,4 +1,5 @@
 from msilib import sequence
+from sched import scheduler
 import numpy as np
 from module.mutators import RandomMutator
 from abstract import Agent
@@ -23,7 +24,7 @@ class HallAgent(Agent):
         if aa is not None:
             self.aa = aa 
         else:
-            self.aa = np.array(range(21))
+            self.aa = np.arange(20)
         
     def random_seq(self, length, aa=None):
         '''
@@ -45,7 +46,7 @@ class HallAgent(Agent):
         return self.sequence
 
 class trAgent(Agent):
-    def __init__(self, target, sequence=None, aa=None, beta=10.0):
+    def __init__(self, target, sequence=None, aa=None, beta=10.0, multiplier=2, schedule=5000):
         '''
         Method
             Initialize the hallucination agent
@@ -58,6 +59,9 @@ class trAgent(Agent):
         self.target = target
         self.mutator = RandomMutator(self.length, aa)
         self.beta = beta
+        self.schedule = schedule
+        self.multiplier = multiplier
+        self.steps = 0
         self.E = 999.9
         if sequence is not None:
             self.sequence = sequence
@@ -67,7 +71,7 @@ class trAgent(Agent):
         if aa is not None:
             self.aa = aa 
         else:
-            self.aa = np.array(range(21))
+            self.aa = np.arange(20)
         
     def random_seq(self, length, aa=None):
         '''
@@ -103,4 +107,10 @@ class trAgent(Agent):
                 self.E = E
             else:
                 self.sequence = np.copy(self.temporary) 
-                self.temporary = None        
+                self.temporary = None     
+
+        self.steps += 1
+        if self.steps % self.schedule == self.schedule-1:
+            self.beta *= self.multiplier
+        
+        return self.sequence
