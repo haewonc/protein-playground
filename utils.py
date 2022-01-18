@@ -118,3 +118,20 @@ def get_angles(a, b, c):
     x = np.sum(v*w, axis=1)
 
     return np.arccos(x)
+
+def seq_to_input(self, seq):
+    ncol = tf.shape(seq)[1]
+    msa1hot  = tf.one_hot(seq, 21)
+    weight = reweight(msa1hot, 0.8)
+    f1d_seq = msa1hot[0,:,:20]
+    f1d_pssm = msa2pssm(msa1hot, weight)
+    f1d = tf.concat(values=[f1d_seq, f1d_pssm], axis=1)
+    f1d = tf.expand_dims(f1d, axis=0)
+    f1d = tf.reshape(f1d, [1,ncol,42])
+    f2d_dca = tf.zeros([ncol,ncol,442], tf.float32)
+    f2d_dca = tf.expand_dims(f2d_dca, axis=0)
+    f2d = tf.concat([tf.tile(f1d[:,:,None,:], [1,1,ncol,1]),
+                    tf.tile(f1d[:,None,:,:], [1,ncol,1,1]),
+                    f2d_dca], axis=-1)
+    f2d = tf.reshape(f2d, [1,ncol,ncol,442+2*42])
+    return f2d

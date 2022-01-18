@@ -1,5 +1,7 @@
+from turtle import back
 import torch
 from torch import nn, einsum
+import numpy as np
 import torch.nn.functional as F
 
 def elu():
@@ -115,3 +117,31 @@ class trBackground(nn.Module):
         prob_omega = self.to_prob_omega(x)      # anglegrams for omega
 
         return prob_theta, prob_phi, prob_distance, prob_omega
+
+class Ensemble:
+    def __init__(self, net, saved_dirs, device):
+        models = [net().to(device) for _ in len(saved_dirs)]
+        for model, saved_dir in zip(models, saved_dirs):
+            model.load_state_dict(torch.load(saved_dir))
+        self.models = models
+        self.device = device
+    
+    def forward(self, x):
+        out = {'dist':[], 'omega':[], 'theta':[], 'phi':[]}
+        for model in self.models:
+            pd, pt, po, pp = model.forward(x)
+            if self.device == "cuda":
+                pd = pd.cpu().detach()
+                pt = pt.cpu().detach()
+                po = po.cpu().detach()
+                pp = pp.cpu().detach()
+
+            out['dist'].append(np.mean(pd.numpy(),axis=0))
+            out['theta'].append(np.mean(pt.numpy(),axis=0))
+            out['omega'].append(np.mean(po.numpy(),axis=0))
+            out['phi'].append(np.mean(pp.numpy(),axis=0))
+
+        for key in out.keys():
+            out[key] = np.mean(out[key], axis=0)
+        
+        return np.array(out.values())

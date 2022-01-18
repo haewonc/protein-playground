@@ -1,4 +1,6 @@
+from msilib import sequence
 import numpy as np
+from module.mutators import RandomMutator
 from abstract import Agent
 
 class HallAgent(Agent):
@@ -13,6 +15,7 @@ class HallAgent(Agent):
         '''
         self.length = len(target)
         self.target = target
+        self.mutator = RandomMutator(self.length, aa)
         if sequence is not None:
             self.sequence = sequence
         else:
@@ -20,7 +23,7 @@ class HallAgent(Agent):
         if aa is not None:
             self.aa = aa 
         else:
-            self.aa = np.array(range(20))
+            self.aa = np.array(range(21))
         
     def random_seq(self, length, aa=None):
         '''
@@ -32,18 +35,17 @@ class HallAgent(Agent):
         '''
         return np.random.choice(self.aa if aa is None else aa, length)
     
-    def mutate(self, pos, aa):
+    def mutate(self):
         '''
         Method
             Mutate the sequence
-        Params
-            pos (int) position of mutation
-            aa (int) selected amino acid 
         '''
+        pos, aa = self.mutator.mutate(self.sequence)
         self.sequence[pos] = aa
+        return self.sequence
 
 class trAgent(Agent):
-    def __init__(self, target, sequence=None, aa=None):
+    def __init__(self, target, sequence=None, aa=None, beta=10.0):
         '''
         Method
             Initialize the hallucination agent
@@ -54,14 +56,18 @@ class trAgent(Agent):
         '''
         self.length = len(target)
         self.target = target
+        self.mutator = RandomMutator(self.length, aa)
+        self.beta = beta
+        self.E = 999.9
         if sequence is not None:
             self.sequence = sequence
         else:
             self.sequence = self.random_seq(self.length)
+        self.temporary = None
         if aa is not None:
             self.aa = aa 
         else:
-            self.aa = np.array(range(20))
+            self.aa = np.array(range(21))
         
     def random_seq(self, length, aa=None):
         '''
@@ -73,12 +79,28 @@ class trAgent(Agent):
         '''
         return np.random.choice(self.aa if aa is None else aa, length)
     
-    def mutate(self, pos, aa):
+    def mutate(self):
         '''
         Method
             Mutate the sequence
-        Params
-            pos (int) position of mutation
-            aa (int) selected amino acid 
         '''
+        pos, aa = self.mutator.mutate(self.sequence)
+        self.temporary = np.copy(self.sequence)
         self.sequence[pos] = aa
+        return self.sequence
+    
+    def report(self, E):
+        '''
+        Method
+            Accept or discard the mutation
+        Params
+            E (float) result of mutation
+        '''
+        if E < self.E:
+            self.E = E
+        else:
+            if np.exp((E-self.E)*self.beta) > np.random.uniform():
+                self.E = E
+            else:
+                self.sequence = np.copy(self.temporary) 
+                self.temporary = None        
