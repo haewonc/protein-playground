@@ -18,13 +18,13 @@ def main():
         aa_skip = aa2idx(args.RM_AA.replace(',',''))
         aa_valid = np.setdiff1d(aa_valid, aa_skip)
 
-    # Initialize target sequence and length
+    # Initialize sequence and length
     if args.SEQ != "":
         length = len(args.SEQ)
-        target = args.SEQ
+        sequence = args.SEQ
     else:
         length = args.LEN
-        target = np.random.choice(aa_valid, length)
+        sequence = np.random.choice(aa_valid, length)
 
     # Get saved model path
     if '&' in args.TRDIR:
@@ -39,7 +39,7 @@ def main():
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    agent = trAgent(target=target, aa=aa_valid, beta=beta, multiplier=multiplier, schedule=schedule)
+    agent = trAgent(sequence=sequence, aa=aa_valid, beta=beta, multiplier=multiplier, schedule=schedule)
     criterion = PQ_KL(pred_dirs=TRDIR, bkgrd_dirs=BKDIR, aa_weight=args.AA_WEIGHT, device=device)
 
     for epoch in range(NUM_EPOCHS):

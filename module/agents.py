@@ -5,36 +5,21 @@ from module.mutators import RandomMutator
 from abstract import Agent
 
 class HallAgent(Agent):
-    def __init__(self, target, sequence=None, aa=None):
+    def __init__(self, sequence, aa=None):
         '''
         Method
             Initialize the hallucination agent
         Params
-            target (numpy array) target amino acid sequence
             sequence (numpy array) current amino acid sequence
             aa (numpy array) amino acid list used in sampling
         '''
-        self.length = len(target)
-        self.target = target
+        self.length = len(sequence)
+        self.sequence = sequence
         self.mutator = RandomMutator(self.length, aa)
-        if sequence is not None:
-            self.sequence = sequence
-        else:
-            self.sequence = self.random_seq(self.length)
         if aa is not None:
             self.aa = aa 
         else:
             self.aa = np.arange(20)
-        
-    def random_seq(self, length, aa=None):
-        '''
-        Method
-            Randomly select amino acid sequence from amino acid pool 
-        Params
-            length (int) legnth of sequence
-            aa (numpy array) amino acid list used in sampling
-        '''
-        return np.random.choice(self.aa if aa is None else aa, length)
     
     def mutate(self):
         '''
@@ -46,42 +31,27 @@ class HallAgent(Agent):
         return self.sequence
 
 class trAgent(Agent):
-    def __init__(self, target, sequence=None, aa=None, beta=10.0, multiplier=2, schedule=5000):
+    def __init__(self, sequence, aa=None, beta=10.0, multiplier=2, schedule=5000):
         '''
         Method
             Initialize the hallucination agent
         Params
-            target (numpy array) target amino acid sequence
             sequence (numpy array) current amino acid sequence
             aa (numpy array) amino acid list used in sampling
         '''
-        self.length = len(target)
-        self.target = target
+        self.length = len(sequence)
         self.mutator = RandomMutator(self.length, aa)
         self.beta = beta
         self.schedule = schedule
         self.multiplier = multiplier
         self.steps = 0
         self.E = 999.9
-        if sequence is not None:
-            self.sequence = sequence
-        else:
-            self.sequence = self.random_seq(self.length)
+        self.sequence = self.random_seq(self.length)
         self.temporary = None
         if aa is not None:
             self.aa = aa 
         else:
             self.aa = np.arange(20)
-        
-    def random_seq(self, length, aa=None):
-        '''
-        Method
-            Randomly select amino acid sequence from amino acid pool 
-        Params
-            length (int) legnth of sequence
-            aa (numpy array) amino acid list used in sampling
-        '''
-        return np.random.choice(self.aa if aa is None else aa, length)
     
     def mutate(self):
         '''
