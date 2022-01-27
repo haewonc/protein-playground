@@ -8,4 +8,5 @@ git clone https://github.com/haewonc/protein-playground.git
 2. Download PDB FASTA dataset outside this repository
 ```
 wget https://ftp.wwpdb.org/pub/pdb/derived_data/pdb_seqres.txt.gz
+gzip -d pdb_seqres.txt.gz
 ```

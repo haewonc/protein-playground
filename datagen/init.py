@@ -4,7 +4,6 @@ import numpy as np
 
 DDIR = "../../pdb/pdb_seqres.txt"
 ODIR = "../../pdb/bylen/"
-LENGTH = 90
 pdb = open(DDIR, 'r').readlines()
 
 pdb = [line[:-1] for line in pdb]
